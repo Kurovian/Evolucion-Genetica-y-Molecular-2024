@@ -1,0 +1,171 @@
+###Clase 2 EVOLUCIÓN GENÉTICA Y MOLECULAR
+
+##¿POR QUÉ NO USAR MEGA?
+
+# 1. Tener las secuencias
+# 2. Alinear las secuencias. Tenemos dos logaritmos para alinear: CrustalW y Muscle.
+
+         #Muscle -> DNA
+
+##Hacer alineamientos en R
+
+#Descargar la librería msa
+
+BiocManager::install("msa")
+
+#Cargar la librería de msa
+
+library(msa)
+
+#Cambiar el formato a uno que lea el msa
+
+mySequence <- readAAStringSet(fas)
+
+#Haciendo la primera alineación con matriz de sustitución predeterminada
+
+myFirstAlignment <- msa(mySequence)
+
+#Haciendo el alineamiento con Muscle
+
+myMuscleAlignment <- msa(mySequence, "Muscle")
+
+#Para ver la alineación realizada
+
+myMuscleAlignment
+
+#Para guardar la alineación en formato fasta
+
+writeXStringSet(unmasked(myMuscleAlignment), file="almuscle.fasta")
+
+##Hacer análisis filogenéticos
+
+#Instalar la librería "ape"
+
+install.packages("ape")
+
+#Cargar la librería
+
+library(ape)
+
+#Convertir la secuencia a un formato de librería ape
+
+my_sequence <- read.dna("almuscle2024.fasta", format = "fasta")
+
+#Para leer la secuencia  y comprobar que se realizó bien
+
+my_sequence
+
+#Para ver la estructura de la secuencia
+
+str(my_sequence)
+
+## Estimar el modelo de evolución
+
+#Instalar la librería "phangorn" de CRAN
+install.packages("phangorn")
+
+#Cargar la librería
+library(phangorn)
+
+#Cambiando el nombre para mayor entendimiento
+
+canis <- read.dna("almuscle2024.fasta", format = "fasta")
+
+#Cambiando el formato para usarse en phangorn
+
+canis_phyDat <- phyDat(canis, type = "DNA", levels = NULL)
+
+#Haciendo el modelado filogenético
+
+mt <- modelTest(canis_phyDat)
+
+#Leer la cantidad de modelos encontrados en phangorn
+
+mt
+
+##Identificar cual es el mejor modelo de los obtenidos
+
+#Para exportar los modelos en un formato legible en Excel
+
+write.csv(mt, "mt2.csv")
+
+#Elegir en BIC ordenar y filtrar la columna de menor a mayor
+
+#HYK fue el modelo más adecuado#
+
+##Para correr Mrbayes necesitamos nuestra base en formato nexus
+
+##NOTA: Paso anterior, se debe descargar de internet el ejecutable de MrBayes
+
+#Convertir el formato fasta to nexus
+
+install.packages("seqinr")
+
+#Cargar la librería
+
+library(seqinr)
+
+#Exportando el archivo en formato nexus
+
+data = read.fasta("almuscle2024.fasta")
+write.nexus.data(data, file = "my_sequences3.nexus", interleave = FALSE)
+
+#Inicar el programa de MrBayes
+
+##Ejecutando dentro de MrBayes
+
+EXECUTE my_sequences3.nexus
+
+#Para revisar las caracteristicas del modelo y parámetros
+
+showmodel
+
+#Para modificar los parámetros del modelo de verosimilitud
+
+help lset
+
+#Para modificar los parámetros del modelo de filogenético
+
+help prset
+ 
+#Pero, para ajustar los parámetros en un modelo HYK
+ 
+ lset nst=2 rates=gamma ngammacat=4
+ 
+#Agregando la MCMC (Markov Chain Monte Carlo)
+
+MCMC ngen=1000000 
+samplefreq=200 
+printfreq=200 
+printall=yes
+mcmcdiagn=yes
+diagnfreq=2000
+relburnin=yes
+burninfrac=0.2
+savebrlens=yes;
+
+##Cuando termine de correr el diagnóstico
+#Si el valor de la desviación estándar es menor a 0.05, entonces indicar que "no"
+
+##Resumir y evaluar los resultados
+
+#Para evaluar los valores estimados
+#SUMP burnin=(20% de datos muestreados)
+
+SUMP burnin=200000
+
+#Para que obtengamos el árbol
+#SUMT burnin=(20% de datos muestreados)
+
+SUMT burnin=200000
+
+
+###NOTA: Se debe descargar los ejecutables de Figtree y Tracer, para ello es importante tener la versión más actualizada de java
+
+##Dentro de FigTree abrir el archivo tipo .TRE
+
+#Para saber si un árbol es de calidad debe de consultarse el Índice Bayesiano (IB) o el Bootstrap
+
+##Para Tracer, seleccionar de la carpeta de trabajo aquellos archivos tipo .p y abrir con Tracer
+
+

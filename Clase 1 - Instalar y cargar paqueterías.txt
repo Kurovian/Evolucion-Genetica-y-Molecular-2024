@@ -1,0 +1,35 @@
+#SCRIPT PARA INSTALAR Y CARGAR UNA PAQUETERÍA EN R#
+
+
+#Para instalar una libreria
+install.packages("BiocManager")
+
+#Para cargar la libreria
+library(BiocManager)
+
+#Para instalar una librería de BiocManager
+
+BiocManager::install("DECIPHER")
+
+#Para cargar la librería DECIPHER
+
+library(DECIPHER)
+
+#Para definir el directorio de trabajo
+
+setwd("D:/Cosas Vian/Materiales de clase/8 Semestre/Evolución Genética y Molecular/Clase 1")
+
+#Para cargar la base de datos de DNA
+
+fas <- "sequence.fasta"
+
+#Para leer la base de datos
+
+readDNAStringSet(fas)
+
+#Para guardar la lectura de la  base de datos de DNA
+
+dna <- readDNAStringSet(fas)
+
+
+
